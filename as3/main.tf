@@ -4,6 +4,17 @@ provider "bigip" {
   password = "${var.password}"
 }
 
+# download jq
+resource "null_resource" "download_jq" {
+  provisioner "local-exec" {
+    command = <<EOH
+curl -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+chmod 0755 jq
+# Do some kind of JSON processing with ./jq
+EOH
+  }
+}
+
 # download rpm
 resource "null_resource" "download_as3" {
   provisioner "local-exec" {
