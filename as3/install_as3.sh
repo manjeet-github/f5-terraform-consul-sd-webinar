@@ -23,7 +23,7 @@ TARGET_RPM="$3"
 RPM_NAME=$(basename $TARGET_RPM)
 CURL_FLAGS="--silent --write-out \n --insecure -u $CREDS"
 
-sudo apt-get install -y jq
+apt-get install -y jq
 
 poll_task () {
     STATUS="STARTED"
