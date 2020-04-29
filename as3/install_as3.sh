@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -e
+pwd
+export PATH=$PATH:../
 
 if [ -z "$1" ]; then
     echo "Target machine is required for installation."
