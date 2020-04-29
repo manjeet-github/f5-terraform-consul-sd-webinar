@@ -20,6 +20,7 @@ resource "null_resource" "download_as3" {
   provisioner "local-exec" {
     command = "wget ${var.as3_rpm_url}"
   }
+  depends_on = [null_resource.download_jq]  
 }
 
 # install rpm to BIG-IP
