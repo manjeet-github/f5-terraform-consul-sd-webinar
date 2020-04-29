@@ -1,8 +1,6 @@
 #!/bin/bash
 
 set -e
-pwd
-export PATH=$PATH:../
 
 if [ -z "$1" ]; then
     echo "Target machine is required for installation."
@@ -30,10 +28,10 @@ poll_task () {
     while [ $STATUS != "FINISHED" ]; do
         sleep 1
         RESULT=$(curl ${CURL_FLAGS} "https://$TARGET/mgmt/shared/iapp/package-management-tasks/$1")
-        STATUS=$(echo $RESULT | jq -r .status)
+        STATUS=$(echo $RESULT | ./jq -r .status)
         if [ $STATUS = "FAILED" ]; then
-            echo "Failed to" $(echo $RESULT | jq -r .operation) "package:" \
-                $(echo $RESULT | jq -r .errorMessage)
+            echo "Failed to" $(echo $RESULT | ./jq -r .operation) "package:" \
+                $(echo $RESULT | ./jq -r .errorMessage)
             exit 1
         fi
     done
@@ -42,8 +40,8 @@ poll_task () {
 #Get list of existing f5-appsvcs packages on target
 TASK=$(curl $CURL_FLAGS -H "Content-Type: application/json" \
     -X POST https://$TARGET/mgmt/shared/iapp/package-management-tasks -d "{operation: 'QUERY'}")
-poll_task $(echo $TASK | jq -r .id)
-AS3RPMS=$(echo $RESULT | jq -r '.queryResponse[].packageName | select(. | startswith("f5-appsvcs"))')
+poll_task $(echo $TASK | ./jq -r .id)
+AS3RPMS=$(echo $RESULT | ./jq -r '.queryResponse[].packageName | select(. | startswith("f5-appsvcs"))')
 
 #Uninstall existing f5-appsvcs packages on target
 for PKG in $AS3RPMS; do
@@ -51,7 +49,7 @@ for PKG in $AS3RPMS; do
     DATA="{\"operation\":\"UNINSTALL\",\"packageName\":\"$PKG\"}"
     TASK=$(curl ${CURL_FLAGS} "https://$TARGET/mgmt/shared/iapp/package-management-tasks" \
         --data $DATA -H "Origin: https://$TARGET" -H "Content-Type: application/json;charset=UTF-8")
-    poll_task $(echo $TASK | jq -r .id)
+    poll_task $(echo $TASK | ./jq -r .id)
 done
 
 #Upload new f5-appsvcs RPM to target
@@ -80,7 +78,7 @@ echo "Installing $RPM_NAME on $TARGET"
 DATA="{\"operation\":\"INSTALL\",\"packageFilePath\":\"/var/config/rest/downloads/$RPM_NAME\"}"
 TASK=$(curl ${CURL_FLAGS} "https://$TARGET/mgmt/shared/iapp/package-management-tasks" \
     --data $DATA -H "Origin: https://$TARGET" -H "Content-Type: application/json;charset=UTF-8")
-poll_task $(echo $TASK | jq -r .id)
+poll_task $(echo $TASK | ./jq -r .id)
 
 echo "Waiting for /info endpoint to be available"
 until curl ${CURL_FLAGS} -o /dev/null --write-out "" --fail --silent \
