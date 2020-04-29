@@ -4,6 +4,7 @@ provider "bigip" {
   password = "${var.password}"
 }
 
+/*
 # download jq
 resource "null_resource" "download_jq" {
   provisioner "local-exec" {
@@ -30,10 +31,11 @@ resource "null_resource" "install_as3" {
   }
   depends_on = [null_resource.download_as3]
 }
-
+*/
+  
 # deploy application using as3
 resource "bigip_as3" "nginx" {
   as3_json    = "${file("nginx.json")}"
   tenant_name = "consul_sd"
-  depends_on  = [null_resource.install_as3]
+  #depends_on  = [null_resource.install_as3]
 }
